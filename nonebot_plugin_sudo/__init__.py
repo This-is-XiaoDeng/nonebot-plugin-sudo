@@ -6,24 +6,15 @@ from .config import Config
 from nonebot.plugin import PluginMetadata
 
 config = Config.parse_obj(get_driver().config)
-try:
-    __plugin_meta__ = PluginMetadata(
-        name="SUDO",
-        description="以指定用户身份执行命令",
-        usage="使用 /sudo 指令以指定用户身份执行命令",
-        type="application",
-        homepage="https://github.com/This-is-XiaoDeng/nonebot-plugin-sudo",
-        config=Config,
-        supported_adapters={"~onebot.v11"},
-    )
-except:
-    # 兼容旧版本 nonebot 
-    __plugin_meta__ = PluginMetadata(
-        name="SUDO",
-        description="以指定用户身份执行命令",
-        usage="使用 /sudo 指令以指定用户身份执行命令",
-        config=Config
-    )
+__plugin_meta__ = PluginMetadata(
+    name="SUDO",
+    description="以指定用户身份执行命令",
+    usage="使用 /sudo 指令以指定用户身份执行命令",
+    type="application",
+    homepage="https://github.com/This-is-XiaoDeng/nonebot-plugin-sudo",
+    config=Config,
+    supported_adapters={"~onebot.v11"}
+)
 
 
 @event_preprocessor
