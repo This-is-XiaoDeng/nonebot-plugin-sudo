@@ -55,8 +55,6 @@ XDbot2 SUDO 插件独立版，允许使用其他用户身份执行命令
 
 ## 💿 安装
 
-> 温馨提示：本插件暂未上架 pypi.org
-
 <details open>
 <summary>使用 nb-cli 安装</summary>
 在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
