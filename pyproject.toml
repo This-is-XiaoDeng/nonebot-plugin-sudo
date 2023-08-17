@@ -10,7 +10,7 @@ authors = [
 		email = "1744793737@qq.com"
 	}
 ]
-version = "1.0.0-beta"
+version = "1.0.0"
 description = " XDbot2 SUDO 插件独立版"
 readme = "README.md"
 requires-python = ">=3.8"
