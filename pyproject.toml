@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nonebot_plugin_sudo"
+authors = [
+	{
+		name = "This is XiaoDeng",
+		email = "1744793737@qq.com"
+	}
+]
+version = "1.0.0-beta"
+description = " XDbot2 SUDO 插件独立版"
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = ["nonebot2", "onebot"]
+license = {text = "MIT-License"}
+classifiers = [
+	"Programming Language :: Python :: 3"
+]
+dependencies = [
+	"nonebot2",
+	"nonebot-adapter-onebot"
+]
+
