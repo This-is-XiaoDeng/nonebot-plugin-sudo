@@ -21,6 +21,6 @@ if not hasattr(get_driver().config, "sudoers"):
     logger.warning("SUDOERS 未设置，已初始化为 空列表")
 
 if not hasattr(get_driver().config, "sudo_insert_cmdstart"):
-    get_driver().config.sudoers = 0
+    get_driver().config.sudo_insert_cmdstart = 0
     logger.warning("SUDO_INSERT_CMDSTART 未设置，已初始化为 假")
 
