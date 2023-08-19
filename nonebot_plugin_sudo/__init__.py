@@ -1,6 +1,6 @@
 from nonebot import get_driver
 from nonebot.message import event_preprocessor
-from nonebot.adapters.onebot.v11 import MessageEvent
+from nonebot.adapters.onebot.v11 import MessageEvent, Message
 from nonebot.log import logger
 from .config import Config
 from nonebot.plugin import PluginMetadata
@@ -23,11 +23,11 @@ async def sudo_command(event: MessageEvent):
         if event.get_plaintext().startswith(f"{command_start}sudo"):
             if event.get_user_id() in list(config.sudoers):
                 # 修改用户信息
-                event.user_id = event.user_id = int(
-                    event.get_plaintext().strip().split(" ")[1])
+                event.user_id = int(
+                    str(event.get_message()).strip().split(" ")[1].replace("[CQ:at,qq=", "").replace("]", ""))
                 # 修改消息
                 cmd_start = command_start if config.sudo_insert_cmdstart else ""
-                event.message[0].data["text"] = cmd_start + " ".join(
-                    event.message[0].data["text"].split(" ")[2:])
+                event.message[0].data["text"] = cmd_start + Message(" ".join(
+                    str(event.get_message()).split(" ")[2:]))
 
 
