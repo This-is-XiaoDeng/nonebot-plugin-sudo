@@ -20,7 +20,7 @@ __plugin_meta__ = PluginMetadata(
 @event_preprocessor
 async def sudo_command(event: MessageEvent):
     for command_start in get_driver().config.command_start:
-        if event.get_plaintext().startswith(f"{command_start}sudo"):
+        if str(event.get_message()).startswith(f"{command_start}sudo"):
             if event.get_user_id() in list(config.sudoers):
                 # 修改用户信息
                 event.user_id = int(
