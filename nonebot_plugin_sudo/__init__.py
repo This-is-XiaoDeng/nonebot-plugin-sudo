@@ -23,12 +23,30 @@ async def sudo_command(event: MessageEvent):
         if event.get_plaintext().startswith(f"{command_start}sudo"):
             if event.get_user_id() in list(config.sudoers):
                 # 修改用户信息
-                event.user_id = int(
-                    str(event.get_message()).strip().split(" ")[1]\
-                        .replace("[CQ:at,qq=", "").replace("]", ""))
+                event.user_id = get_user_id(command_start, event)
                 # 修改消息
                 cmd_start = command_start if config.sudo_insert_cmdstart else ""
-                event.message[0].data["text"] = Message(cmd_start + " ".join(
-                    str(event.get_message()).split(" ")[2:]))
+                event.message[0].data["text"] = change_message(
+                    command_start,
+                    event,
+                    event.user_id,
+                    cmd_start)
 
+def get_user_id(command_start: str, event: MessageEvent) -> int:
+    message_start = event.message[0].data["text"]
+    if (user_id := message_start.replace(f"{command_start}sudo", "").strip()) != "":
+        return user_id
+    else:
+        return int(event.message[1].data["qq"])
 
+def change_message(command_start: str, event: MessageEvent, user_id: int, cmd_start) -> None:
+    message_start = event.message[0].data["text"]
+    if (user_id := message_start.replace(f"{command_start}sudo", "").strip()) != "":
+        event.message[0].data["text"] = cmd_start + event.message[0].data["text"].replace(f"{command_start}sudo", "").replace(f"{user_id}", "").strip()
+    else:
+        event.message.pop(0)
+        event.message.pop(0)
+        try:
+            event.message[0].data["text"] = cmd_start + event.message[0].data["text"].strip()
+        except:
+            pass
