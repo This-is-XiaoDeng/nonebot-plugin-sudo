@@ -24,10 +24,11 @@ async def sudo_command(event: MessageEvent):
             if event.get_user_id() in list(config.sudoers):
                 # 修改用户信息
                 event.user_id = int(
-                    str(event.get_message()).strip().split(" ")[1].replace("[CQ:at,qq=", "").replace("]", ""))
+                    str(event.get_message()).strip().split(" ")[1]\
+                        .replace("[CQ:at,qq=", "").replace("]", ""))
                 # 修改消息
                 cmd_start = command_start if config.sudo_insert_cmdstart else ""
-                event.message[0].data["text"] = cmd_start + Message(" ".join(
+                event.message[0].data["text"] = Message(cmd_start + " ".join(
                     str(event.get_message()).split(" ")[2:]))
 
 
