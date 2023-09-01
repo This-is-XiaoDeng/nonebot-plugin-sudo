@@ -33,7 +33,7 @@ async def sudo_command(event: MessageEvent):
 def get_user_id(event: MessageEvent) -> int:
     message_start = event.message[0].data["text"]
     try:
-        return message_start.split(" ")[1]
+        return message_start.strip().split(" ")[1]
     except IndexError:
         return event.message[1].data["qq"]
 
