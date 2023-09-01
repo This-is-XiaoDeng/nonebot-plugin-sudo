@@ -1,6 +1,6 @@
 from nonebot import get_driver
 from nonebot.message import event_preprocessor
-from nonebot.adapters.onebot.v11 import MessageEvent
+from nonebot.adapters.onebot.v11 import MessageEvent, Message
 from nonebot.log import logger
 from .config import Config
 from nonebot.plugin import PluginMetadata
@@ -20,14 +20,27 @@ __plugin_meta__ = PluginMetadata(
 @event_preprocessor
 async def sudo_command(event: MessageEvent):
     for command_start in get_driver().config.command_start:
-        if event.get_plaintext().startswith(f"{command_start}sudo"):
+        if event.raw_message.startswith(f"{command_start}sudo"):
             if event.get_user_id() in list(config.sudoers):
-                # 修改用户信息
-                event.user_id = event.user_id = int(
-                    event.get_plaintext().strip().split(" ")[1])
-                # 修改消息
+                event.user_id = get_user_id(event)
                 cmd_start = command_start if config.sudo_insert_cmdstart else ""
-                event.message[0].data["text"] = cmd_start + " ".join(
-                    event.message[0].data["text"].split(" ")[2:])
+                change_message(
+                    event,
+                    cmd_start
+                )
+                break
 
+def get_user_id(event: MessageEvent) -> int:
+    message_start = event.message[0].data["text"]
+    try:
+        return message_start.strip().split(" ")[1]
+    except IndexError:
+        return event.message[1].data["qq"]
 
+def change_message(event: MessageEvent, cmd_start) -> None:
+    if (tmp_message := " ".join(event.message[0].data["text"].split(" ")[2:])):
+        event.message[0].data["text"] = cmd_start + tmp_message
+    else:
+        event.message.pop(0)
+        event.message.pop(0)
+        event.message[0].data["text"] = cmd_start + event.message[0].data["text"].strip()
