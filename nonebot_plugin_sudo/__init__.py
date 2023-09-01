@@ -22,28 +22,25 @@ async def sudo_command(event: MessageEvent):
     for command_start in get_driver().config.command_start:
         if event.raw_message.startswith(f"{command_start}sudo"):
             if event.get_user_id() in list(config.sudoers):
-                event.user_id = get_user_id(command_start, event)
+                event.user_id = get_user_id(event)
                 cmd_start = command_start if config.sudo_insert_cmdstart else ""
                 change_message(
-                    command_start,
                     event,
-                    event.user_id,
                     cmd_start
                 )
                 break
 
-def get_user_id(command_start: str, event: MessageEvent) -> int:
+def get_user_id(event: MessageEvent) -> int:
     message_start = event.message[0].data["text"]
-    if (user_id := message_start.replace(f"{command_start}sudo", "").strip()) != "":
-        return int(user_id)
-    else:
+    try:
+        return message_start.split(" ")[1]
+    except IndexError:
         return event.message[1].data["qq"]
 
-def change_message(command_start: str, event: MessageEvent, user_id: int, cmd_start) -> None:
-    message_start = event.message[0].data["text"]
-    if (user_id := message_start.replace(f"{command_start}sudo", "").strip()) != "":
-        event.message[0].data["text"] = cmd_start + event.message[0].data["text"].replace(f"{command_start}sudo", "", 1).replace(f"{user_id}", "", 1).strip()
-    else:
+def change_message(event: MessageEvent, cmd_start) -> None:
+    try:
+        event.message[0].data["text"] = cmd_start + " ".join(event.message[0].data["text"].split(" ")[2:])
+    except IndexError:
         event.message.pop(0)
         event.message.pop(0)
         try:
