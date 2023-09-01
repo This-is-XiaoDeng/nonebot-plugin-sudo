@@ -26,11 +26,13 @@ async def sudo_command(event: MessageEvent):
                 event.user_id = get_user_id(command_start, event)
                 # 修改消息
                 cmd_start = command_start if config.sudo_insert_cmdstart else ""
-                event.message[0].data["text"] = change_message(
+                change_message(
                     command_start,
                     event,
                     event.user_id,
-                    cmd_start)
+                    cmd_start
+                )
+            break
 
 def get_user_id(command_start: str, event: MessageEvent) -> int:
     message_start = event.message[0].data["text"]
