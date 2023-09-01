@@ -43,7 +43,4 @@ def change_message(event: MessageEvent, cmd_start) -> None:
     else:
         event.message.pop(0)
         event.message.pop(0)
-        try:
-            event.message[0].data["text"] = cmd_start + event.message[0].data["text"].strip()
-        except:
-            pass
+        event.message[0].data["text"] = cmd_start + event.message[0].data["text"].strip()
