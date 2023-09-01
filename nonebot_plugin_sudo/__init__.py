@@ -38,9 +38,9 @@ def get_user_id(event: MessageEvent) -> int:
         return event.message[1].data["qq"]
 
 def change_message(event: MessageEvent, cmd_start) -> None:
-    try:
-        event.message[0].data["text"] = cmd_start + " ".join(event.message[0].data["text"].split(" ")[2:])
-    except IndexError:
+    if (tmp_message := " ".join(event.message[0].data["text"].split(" ")[2:])):
+        event.message[0].data["text"] = cmd_start + tmp_message
+    else:
         event.message.pop(0)
         event.message.pop(0)
         try:
