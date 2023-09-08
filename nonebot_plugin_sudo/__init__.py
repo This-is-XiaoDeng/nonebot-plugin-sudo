@@ -1,4 +1,6 @@
 from nonebot import get_driver
+from nonebot import get_bots
+from nonebot.adapters.onebot.v11.bot import Bot
 from nonebot.message import event_preprocessor
 from nonebot.adapters.onebot.v11 import MessageEvent
 from nonebot.matcher import Matcher
@@ -49,7 +51,7 @@ def change_message(event: MessageEvent, cmd_start) -> None:
         )
 
 
-async def handle_api_call(api: str, data: dict[str, any], matcher: Matcher = Matcher()):
+async def handle_api_call(_bot: Bot, api: str, data: dict[str, any], matcher: Matcher = Matcher()):
     if (
         api == "send_msg"
         and data["message_type"] == "private"
@@ -57,3 +59,6 @@ async def handle_api_call(api: str, data: dict[str, any], matcher: Matcher = Mat
         and hasattr(matcher, "_sudo_original_user")
     ):
         data["user_id"] = matcher._sudo_original_user
+
+for bot in list(get_bots().values()):
+    bot.on_calling_api(handle_api_call)
