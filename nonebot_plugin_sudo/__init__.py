@@ -42,13 +42,13 @@ async def sudo_command(event: MessageEvent, bot: Bot):
                     await asyncio.sleep(0.1)
                 _sudo_original_user[event.user_id] = event
             if config.sudo_replace_sender_data:
-                change_sneder_data(bot, event)
+                await change_sneder_data(bot, event)
             cmd_start = command_start if config.sudo_insert_cmdstart else ""
             change_message(event, cmd_start)
             break
 
 
-def change_sneder_data(bot: Bot, event: MessageEvent):
+async def change_sneder_data(bot: Bot, event: MessageEvent):
     if isinstance(event, GroupMessageEvent):
         try:
             user_info = await bot.get_group_member_info(
