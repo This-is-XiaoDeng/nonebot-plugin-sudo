@@ -32,7 +32,7 @@ async def sudo_postprocessor(event: MessageEvent):
 async def sudo_command(event: MessageEvent):
     for command_start in get_driver().config.command_start:
         if event.raw_message.startswith(f"{command_start}sudo") and event.get_user_id() in list(config.sudoers):
-            event._sudo_origin_user = event.user_id
+            event._sudo_original_user = event.user_id
             event.user_id = get_user_id(event)
             # 不建议在私聊使用 /sudo 指令，可能出现一些不可预料的 Bug
             if event.message_type == "private":
