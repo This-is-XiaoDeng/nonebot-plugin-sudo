@@ -20,12 +20,12 @@ __plugin_meta__ = PluginMetadata(
 
 
 @event_preprocessor
-async def sudo_command(event: MessageEvent, matcher: Matcher = Matcher()):
+async def sudo_command(event: MessageEvent):
     for command_start in get_driver().config.command_start:
         if event.raw_message.startswith(f"{command_start}sudo") and event.get_user_id() in list(config.sudoers):
             # 不建议在私聊使用 /sudo 指令，可能出现一些不可预料的 Bug
             if event.message_type == "private":
-                matcher._sudo_originel_user = event.user_id
+                event._sudo_originel_user = event.user_id
             event.user_id = get_user_id(event)
             cmd_start = command_start if config.sudo_insert_cmdstart else ""
             change_message(event, cmd_start)
@@ -51,14 +51,14 @@ def change_message(event: MessageEvent, cmd_start) -> None:
         )
 
 
-async def handle_api_call(_bot: Bot, api: str, data: dict[str, any], matcher: Matcher = Matcher()):
+async def handle_api_call(_bot: Bot, api: str, data: dict[str, any], event: MessageEvent):
     if (
         api == "send_msg"
         and data["message_type"] == "private"
         or api in ["send_private_forward_msg", "send_private_msg"]
-        and hasattr(matcher, "_sudo_original_user")
+        and hasattr(event, "_sudo_original_user")
     ):
-        data["user_id"] = matcher._sudo_original_user
+        data["user_id"] = event._sudo_original_user
 
 for bot in list(get_bots().values()):
     bot.on_calling_api(handle_api_call)
