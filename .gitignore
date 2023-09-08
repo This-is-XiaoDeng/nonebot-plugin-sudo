@@ -174,3 +174,10 @@ pyrightconfig.json
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/nonebot-plugin-sudo.iml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/vcs.xml

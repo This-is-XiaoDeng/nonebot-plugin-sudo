@@ -1,7 +1,7 @@
 from nonebot import get_driver
 from nonebot.message import event_preprocessor
-from nonebot.adapters.onebot.v11 import MessageEvent, Message
-from nonebot.log import logger
+from nonebot.adapters.onebot.v11 import MessageEvent
+from nonebot.matcher import Matcher
 from .config import Config
 from nonebot.plugin import PluginMetadata
 
@@ -16,22 +16,18 @@ __plugin_meta__ = PluginMetadata(
     supported_adapters={"~onebot.v11"},
 )
 
-sudo = False
-use_sudo = 0
-
 
 @event_preprocessor
-async def sudo_command(event: MessageEvent):
-    global sudo
-    global use_sudo
-    sudo = False
+async def sudo_command(event: MessageEvent, matcher: Matcher = Matcher()):
     for command_start in get_driver().config.command_start:
-        if event.raw_message.startswith(f"{command_start}sudo"):
-            if event.get_user_id() in list(config.sudoers):
-                event.user_id = get_user_id(event)
-                cmd_start = command_start if config.sudo_insert_cmdstart else ""
-                change_message(event, cmd_start)
-                break
+        if event.raw_message.startswith(f"{command_start}sudo") and event.get_user_id() in list(config.sudoers):
+            # 不建议在私聊使用 /sudo 指令，可能出现一些不可预料的 Bug
+            if event.message_type == "private":
+                matcher._sudo_originel_user = event.user_id
+            event.user_id = get_user_id(event)
+            cmd_start = command_start if config.sudo_insert_cmdstart else ""
+            change_message(event, cmd_start)
+            break
 
 
 def get_user_id(event: MessageEvent) -> int:
@@ -53,12 +49,11 @@ def change_message(event: MessageEvent, cmd_start) -> None:
         )
 
 
-@Bot.on_calling_api
-async def handle_api_call(bot: Bot, api: str, data: dict[str, any]):
+async def handle_api_call(api: str, data: dict[str, any], matcher: Matcher = Matcher()):
     if (
         api == "send_msg"
-        and sudo
         and data["message_type"] == "private"
-        or api == "send_private_forward_msg"
+        or api in ["send_private_forward_msg", "send_private_msg"]
+        and hasattr(matcher, "_sudo_original_user")
     ):
-        data["user_id"] = use_sudo
+        data["user_id"] = matcher._sudo_original_user
