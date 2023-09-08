@@ -1,9 +1,7 @@
-from nonebot import get_driver
-from nonebot import get_bots
 from nonebot.adapters.onebot.v11.bot import Bot
 from nonebot.message import event_preprocessor
 from nonebot.adapters.onebot.v11 import MessageEvent
-from nonebot.matcher import Matcher
+from nonebot import get_driver
 from .config import Config
 from nonebot.plugin import PluginMetadata
 
@@ -60,5 +58,7 @@ async def handle_api_call(_bot: Bot, api: str, data: dict[str, any], event: Mess
     ):
         data["user_id"] = event._sudo_original_user
 
-for bot in list(get_bots().values()):
+
+@get_driver().on_bot_connect
+async def on_bot_connect(bot: Bot):
     bot.on_calling_api(handle_api_call)
