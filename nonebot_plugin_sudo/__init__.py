@@ -1,4 +1,6 @@
 from nonebot.adapters.onebot.v11.bot import Bot
+from nonebot.adapters.onebot.v11 import GroupMessageEvent
+from nonebot.exception import ActionFailed
 from nonebot.message import event_preprocessor
 from nonebot.message import event_postprocessor
 from nonebot.adapters.onebot.v11 import MessageEvent
@@ -29,7 +31,7 @@ async def sudo_postprocessor(event: MessageEvent):
 
 
 @event_preprocessor
-async def sudo_command(event: MessageEvent):
+async def sudo_command(event: MessageEvent, bot: Bot):
     for command_start in get_driver().config.command_start:
         if event.raw_message.startswith(f"{command_start}sudo") and event.get_user_id() in list(config.sudoers):
             event._sudo_original_user = event.user_id
@@ -39,9 +41,44 @@ async def sudo_command(event: MessageEvent):
                 while event.user_id in _sudo_original_user.keys():
                     await asyncio.sleep(0.1)
                 _sudo_original_user[event.user_id] = event
+            if config.sudo_replace_sender_data:
+                change_sneder_data(bot, event)
             cmd_start = command_start if config.sudo_insert_cmdstart else ""
             change_message(event, cmd_start)
             break
+
+
+def change_sneder_data(bot: Bot, event: MessageEvent):
+    if isinstance(event, GroupMessageEvent):
+        try:
+            user_info = await bot.get_group_member_info(
+                group_id=event.group_id,
+                user_id=event.user_id,
+                no_cache=True,
+            )
+            event.sender.age = user_info["age"]
+            event.sender.level = user_info["level"]
+            event.sender.sex = user_info["sex"]
+            event.sender.nickname = user_info["nickname"]
+            event.sender.area = user_info["area"]
+            event.sender.card = user_info["card"]
+            event.sender.role = user_info["role"]
+        except ActionFailed:
+            user_info = await bot.get_stranger_info(
+                user_id=event.user_id, no_cache=True
+            )
+            event.sender.age = user_info["age"]
+            event.sender.level = user_info["level"]
+            event.sender.sex = user_info["sex"]
+            event.sender.nickname = user_info["nickname"]
+    else:
+        user_info = await bot.get_stranger_info(
+            user_id=event.user_id, no_cache=True
+        )
+        event.sender.age = user_info["age"]
+        event.sender.level = user_info["level"]
+        event.sender.sex = user_info["sex"]
+        event.sender.nickname = user_info["nickname"]
 
 
 def get_user_id(event: MessageEvent) -> int:
