@@ -1,8 +1,10 @@
 from nonebot.adapters.onebot.v11.bot import Bot
 from nonebot.message import event_preprocessor
+from nonebot.message import event_postprocessor
 from nonebot.adapters.onebot.v11 import MessageEvent
 from nonebot import get_driver
 from .config import Config
+import asyncio
 from nonebot.plugin import PluginMetadata
 
 config = Config.parse_obj(get_driver().config)
@@ -15,16 +17,28 @@ __plugin_meta__ = PluginMetadata(
     config=Config,
     supported_adapters={"~onebot.v11"},
 )
+_sudo_original_user: dict[int, MessageEvent] = {}
+
+
+@event_postprocessor
+async def sudo_postprocessor(event: MessageEvent):
+    if not hasattr(event, "_sudo_original_user"):
+        return
+    if event.user_id in _sudo_original_user.keys():
+        _sudo_original_user.pop(event.user_id)
 
 
 @event_preprocessor
 async def sudo_command(event: MessageEvent):
     for command_start in get_driver().config.command_start:
         if event.raw_message.startswith(f"{command_start}sudo") and event.get_user_id() in list(config.sudoers):
+            event._sudo_origin_user = event.user_id
+            event.user_id = get_user_id(event)
             # 不建议在私聊使用 /sudo 指令，可能出现一些不可预料的 Bug
             if event.message_type == "private":
-                event._sudo_originel_user = event.user_id
-            event.user_id = get_user_id(event)
+                while event.user_id in _sudo_original_user.keys():
+                    await asyncio.sleep(0.1)
+                _sudo_original_user[event.user_id] = event
             cmd_start = command_start if config.sudo_insert_cmdstart else ""
             change_message(event, cmd_start)
             break
@@ -49,14 +63,13 @@ def change_message(event: MessageEvent, cmd_start) -> None:
         )
 
 
-async def handle_api_call(_bot: Bot, api: str, data: dict[str, any], event: MessageEvent):
+async def handle_api_call(_bot: Bot, api: str, data: dict[str, any]):
     if (
-        api == "send_msg"
-        and data["message_type"] == "private"
+        (api == "send_msg" and data["message_type"] == "private")
         or api in ["send_private_forward_msg", "send_private_msg"]
-        and hasattr(event, "_sudo_original_user")
+        and data["user_id"] in _sudo_original_user.keys()
     ):
-        data["user_id"] = event._sudo_original_user
+        data["user_id"] = _sudo_original_user[data["user_id"]]._sudo_original_user
 
 
 @get_driver().on_bot_connect
